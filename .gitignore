@@ -11,3 +11,6 @@ target/
 # OS
 .DS_Store
 Thumbs.db
+
+# Config properties
+src/main/resources/config.properties
