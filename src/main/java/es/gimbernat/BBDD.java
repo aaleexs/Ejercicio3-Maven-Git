@@ -2,7 +2,12 @@ package es.gimbernat;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -53,69 +58,69 @@ public class BBDD {
             return null;
         }
     return p;
+    } 
+
+    public boolean insertDepartamento(Departamento d) {
+    String sql = "INSERT INTO departamentos (nombre, localidad) VALUES (?, ?)";
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, d.getNombre());
+        ps.setString(2, d.getLocalidad());
+        ps.executeUpdate();
+        return true;
+    } catch (SQLException ex) {
+        showError(ex);
+        return false;
     }
+}
 
-    public boolean insertEmpleado(Empleado e) {
-        String sql = "INSERT INTO empleados (nombre, salario) VALUES (?, ?)";
+public boolean updateDepartamento(Departamento d) {
+    String sql = "UPDATE departamentos SET nombre = ?, localidad = ? WHERE id = ?";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, e.getNombre());
-            ps.setDouble(2, e.getSalario());
-            ps.executeUpdate();
-            return true;
-        } catch (SQLException ex) {
-            showError(ex);
-            return false;
-        }
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, d.getNombre());
+        ps.setString(2, d.getLocalidad());
+        ps.setInt(3, d.getId());
+        ps.executeUpdate();
+        return true;
+    } catch (SQLException ex) {
+        showError(ex);
+        return false;
     }
+}
 
-    public boolean updateEmpleado(Empleado e) {
-        String sql = "UPDATE empleados SET nombre = ?, salario = ? WHERE id = ?";
+public boolean deleteDepartamento(int id) {
+    String sql = "DELETE FROM departamentos WHERE id = ?";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, e.getNombre());
-            ps.setDouble(2, e.getSalario());
-            ps.setInt(3, e.getId());
-            ps.executeUpdate();
-            return true;
-        } catch (SQLException ex) {
-            showError(ex);
-            return false;
-        }
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, id);
+        ps.executeUpdate();
+        return true;
+    } catch (SQLException ex) {
+        showError(ex);
+        return false;
     }
+}
 
-    public boolean deleteEmpleado(int id) {
-        String sql = "DELETE FROM empleados WHERE id = ?";
+public List<Departamento> getAllDepartamentos() {
+    List<Departamento> lista = new ArrayList<>();
+    String sql = "SELECT * FROM departamentos";
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-            return true;
-        } catch (SQLException ex) {
-            showError(ex);
-            return false;
-        }
-    }
+    try (Statement st = conn.createStatement();
+         ResultSet rs = st.executeQuery(sql)) {
 
-    public List<Empleado> getAllEmpleados() {
-        List<Empleado> lista = new ArrayList<>();
-        String sql = "SELECT * FROM empleados";
-
-        try (Statement st = conn.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-
-            while (rs.next()) {
-                lista.add(new Empleado(
-                        rs.getInt("id"),
-                        rs.getString("nombre"),
-                        rs.getDouble("salario")
-                ));
-            }
-
-        } catch (SQLException ex) {
-            showError(ex);
+        while (rs.next()) {
+            lista.add(new Departamento(
+                    rs.getInt("id"),
+                    rs.getString("nombre"),
+                    rs.getString("localidad")
+            ));
         }
 
-        return lista;
+    } catch (SQLException ex) {
+        showError(ex);
     }
+
+    return lista;
+}
 }
